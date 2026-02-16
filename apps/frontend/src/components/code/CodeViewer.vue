@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { useCodemirror } from '@/composables/use-codemirror';
+import { useCodemirror } from '@/composables/useCodemirror';
 
 interface Props {
   code: string;

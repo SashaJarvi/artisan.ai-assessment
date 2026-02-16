@@ -24,6 +24,12 @@ const layouts = [
   { value: 'cose', label: 'CoSE' },
   { value: 'circle', label: 'Circle' },
 ];
+
+const zoomActions = [
+  { handler: () => emit('zoomIn'), title: 'Zoom in', icon: 'M12 6v12m6-6H6' },
+  { handler: () => emit('zoomOut'), title: 'Zoom out', icon: 'M18 12H6' },
+  { handler: () => emit('fitToView'), title: 'Fit to view', icon: 'M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5' },
+];
 </script>
 
 <template>
@@ -33,7 +39,7 @@ const layouts = [
       <button
         v-for="layout in layouts"
         :key="layout.value"
-        class="px-2 py-1 rounded transition-colors"
+        class="px-2 py-1 rounded transition-colors cursor-pointer"
         :class="[
           currentLayout === layout.value
             ? 'bg-accent/20 text-accent'
@@ -50,19 +56,15 @@ const layouts = [
     <div class="h-4 w-px bg-surface-border" />
 
     <!-- Zoom controls -->
-    <button class="btn-ghost p-1" title="Zoom in" @click="emit('zoomIn')">
+    <button
+      v-for="action in zoomActions"
+      :key="action.title"
+      class="btn-ghost p-1 cursor-pointer"
+      :title="action.title"
+      @click="action.handler"
+    >
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6" />
-      </svg>
-    </button>
-    <button class="btn-ghost p-1" title="Zoom out" @click="emit('zoomOut')">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6" />
-      </svg>
-    </button>
-    <button class="btn-ghost p-1" title="Fit to view" @click="emit('fitToView')">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="action.icon" />
       </svg>
     </button>
 
@@ -75,7 +77,7 @@ const layouts = [
     <span v-if="isTruncated" class="text-amber-400">(truncated)</span>
 
     <!-- Export -->
-    <button class="btn-ghost p-1" title="Export PNG" @click="emit('exportPng')">
+    <button class="btn-ghost p-1 cursor-pointer" title="Export PNG" @click="emit('exportPng')">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
       </svg>

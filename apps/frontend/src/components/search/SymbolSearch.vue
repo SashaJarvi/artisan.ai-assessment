@@ -91,20 +91,20 @@ const kindColor = (kind: string): string => {
       <button
         v-for="result in results"
         :key="result.id"
-        class="w-full flex items-center gap-3 px-3 py-2 hover:bg-white/5 text-left transition-colors"
+        class="w-full flex items-center gap-3 px-3 py-2 hover:bg-white/5 text-left transition-colors cursor-pointer"
         @click="selectResult(result)"
       >
         <span class="text-xs font-mono shrink-0 w-16" :class="kindColor(result.kind)">
           {{ result.kind }}
         </span>
-        <div class="min-w-0 flex-1">
-          <div class="text-sm font-mono text-gray-200 truncate">
+        <span class="min-w-0 flex-1">
+          <span class="block text-sm font-mono text-gray-200 truncate">
             {{ result.name }}
-          </div>
-          <div class="text-xs text-gray-500 truncate">
+          </span>
+          <span class="block text-xs text-gray-500 truncate">
             {{ result.package }} &middot; {{ result.file }}:{{ result.line }}
-          </div>
-        </div>
+          </span>
+        </span>
       </button>
     </div>
 

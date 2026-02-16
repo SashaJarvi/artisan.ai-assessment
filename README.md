@@ -37,11 +37,11 @@ Search for any function, then explore its call tree as an interactive hierarchic
 
 **Turborepo monorepo** with three packages:
 
-| Package | Description |
-|---------|-------------|
+| Package           | Description                                               |
+|-------------------|-----------------------------------------------------------|
 | `packages/shared` | TypeScript interfaces shared between frontend and backend |
-| `apps/backend` | Node.js + Express + better-sqlite3 REST API |
-| `apps/frontend` | Vue 3 + Vite + Tailwind CSS SPA |
+| `apps/backend`    | Node.js + Express + better-sqlite3 REST API               |
+| `apps/frontend`   | Vue 3 + Vite + Tailwind CSS SPA                           |
 
 ### Tech Stack
 
@@ -107,15 +107,15 @@ cpg-explorer/
 
 ## API Endpoints
 
-| Endpoint | Description |
-|----------|-------------|
-| `GET /api/dashboard/*` | Pre-computed dashboard data (overview, distributions, hotspots) |
-| `GET /api/packages/graph` | Package dependency graph for architecture visualization |
-| `GET /api/packages/:name/functions` | Functions in a package |
-| `GET /api/graph/call-chain` | BFS call graph from a function |
-| `GET /api/graph/callers` | Transitive callers of a function |
-| `GET /api/graph/neighborhood` | N-hop neighborhood of a node |
-| `GET /api/graph/cfg` | Control flow graph of a function |
-| `GET /api/source` | Source file content |
-| `GET /api/search/symbol` | Symbol search with LIKE matching |
-| `GET /api/search/xref` | Cross-references for a symbol |
+| Endpoint                            | Description                                                     |
+|-------------------------------------|-----------------------------------------------------------------|
+| `GET /api/dashboard/*`              | Pre-computed dashboard data (overview, distributions, hotspots) |
+| `GET /api/packages/graph`           | Package dependency graph for architecture visualization         |
+| `GET /api/packages/:name/functions` | Functions in a package                                          |
+| `GET /api/graph/call-chain`         | BFS call graph from a function                                  |
+| `GET /api/graph/callers`            | Transitive callers of a function                                |
+| `GET /api/graph/neighborhood`       | N-hop neighborhood of a node                                    |
+| `GET /api/graph/cfg`                | Control flow graph of a function                                |
+| `GET /api/source`                   | Source file content                                             |
+| `GET /api/search/symbol`            | Symbol search with LIKE matching                                |
+| `GET /api/search/xref`              | Cross-references for a symbol                                   |
