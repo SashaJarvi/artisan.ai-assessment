@@ -113,7 +113,7 @@ router.get('/graph', (req, res) => {
 
   // Filter edges by module if specified
   const filteredEdges = moduleFilter
-    ? edges.filter((e) => getModuleFromPackage(e.source) === moduleFilter || getModuleFromPackage(e.target) === moduleFilter)
+    ? edges.filter((e) => getModuleFromPackage(e.source) === moduleFilter && getModuleFromPackage(e.target) === moduleFilter)
     : edges;
 
   for (const e of filteredEdges) {
