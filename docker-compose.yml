@@ -1,0 +1,12 @@
+services:
+  cpg-explorer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      additional_contexts:
+        cpg-source: ../cpg-test-release
+    ports:
+      - "3001:3001"
+    environment:
+      - CPG_DB_PATH=/data/cpg.db
+      - PORT=3001

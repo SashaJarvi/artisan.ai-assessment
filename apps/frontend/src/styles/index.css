@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --accent: #42b883;
+    --accent-light: #5ed3a0;
+    --surface: #1e1e3a;
+    --surface-dark: #0f0f23;
+    --surface-darker: #1a1a2e;
+    --surface-light: #2a2a4a;
+    --surface-border: rgba(255, 255, 255, 0.1);
+  }
+
+  body {
+    @apply bg-surface-dark text-gray-200;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-1.5 h-1.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-white/10 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/20;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply bg-surface rounded-lg border border-surface-border;
+  }
+
+  .panel-header {
+    @apply px-4 py-3 border-b border-surface-border text-sm font-medium text-gray-300;
+  }
+
+  .btn {
+    @apply px-3 py-1.5 rounded-md text-sm font-medium transition-colors;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent/20 text-accent hover:bg-accent/30;
+  }
+
+  .btn-ghost {
+    @apply btn text-gray-400 hover:text-gray-200 hover:bg-white/5;
+  }
+
+  .tag {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
+  }
+
+  .tag-function {
+    @apply tag bg-blue-500/20 text-blue-300;
+  }
+
+  .tag-package {
+    @apply tag bg-purple-500/20 text-purple-300;
+  }
+
+  .tag-type {
+    @apply tag bg-amber-500/20 text-amber-300;
+  }
+}

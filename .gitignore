@@ -1,0 +1,17 @@
+node_modules
+dist
+.turbo
+*.db
+data/
+.env
+.env.local
+.DS_Store
+*.tsbuildinfo
+*.js.map
+*.d.ts.map
+.idea
+# Build artifacts from vue-tsc in frontend root
+apps/frontend/vite.config.js
+apps/frontend/vite.config.d.ts
+apps/frontend/tailwind.config.js
+apps/frontend/tailwind.config.d.ts
