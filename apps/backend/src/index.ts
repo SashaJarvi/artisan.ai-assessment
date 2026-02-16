@@ -43,7 +43,7 @@ const frontendDist = frontendPaths.find((p) => existsSync(p));
 if (frontendDist) {
   console.log(`Serving frontend from ${frontendDist}`);
   app.use(express.static(frontendDist));
-  app.get('*', (_req, res) => {
+  app.get('{*path}', (_req, res) => {
     res.sendFile(resolve(frontendDist, 'index.html'));
   });
 }

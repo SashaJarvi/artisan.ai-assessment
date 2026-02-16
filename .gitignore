@@ -13,5 +13,3 @@ data/
 # Build artifacts from vue-tsc in frontend root
 apps/frontend/vite.config.js
 apps/frontend/vite.config.d.ts
-apps/frontend/tailwind.config.js
-apps/frontend/tailwind.config.d.ts

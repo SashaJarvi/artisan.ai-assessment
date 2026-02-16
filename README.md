@@ -33,9 +33,6 @@ Interactive force-directed graph of ~170+ packages with ~400+ dependency edges. 
 ### Call Graph Explorer
 Search for any function, then explore its call tree as an interactive hierarchical graph. Adjust depth (1-5), toggle between callees and callers. Select a node to view its source code in the integrated CodeMirror editor.
 
-### Data Flow Slicer
-Select a variable or parameter, then trace data flow forward or backward through the codebase. The slice is rendered as a graph, and participating lines are highlighted in the source code viewer.
-
 ## Architecture
 
 **Turborepo monorepo** with three packages:
@@ -77,7 +74,7 @@ Cytoscape is purpose-built for graph analysis with layout algorithms (cola, dagr
 With ~555K nodes and ~1.5M edges, sending the full graph would crash the browser. Every graph endpoint enforces a `max_nodes` parameter (default 60, max 200). BFS/DFS traversals are depth-limited. The frontend shows a "truncated" indicator when limits are hit.
 
 ### Why CodeMirror 6 over Monaco?
-CodeMirror 6 is significantly lighter (~300KB vs ~2MB), supports Go syntax highlighting, and has a clean line decoration API for the data flow overlay feature. Read-only mode is a first-class citizen.
+CodeMirror 6 is significantly lighter (~300KB vs ~2MB), supports Go syntax highlighting, and has a clean line decoration API. Read-only mode is a first-class citizen.
 
 ### Why a single multi-stage Dockerfile?
 Everything — CPG generation, app build, and runtime — is in one Dockerfile with 4 stages. The Express backend serves the Vue SPA as static files, eliminating nginx/reverse proxy. Docker layer caching means the expensive CPG generation (~10-30 min) only runs once; subsequent builds reuse the cached database layer.
@@ -119,8 +116,6 @@ cpg-explorer/
 | `GET /api/graph/callers` | Transitive callers of a function |
 | `GET /api/graph/neighborhood` | N-hop neighborhood of a node |
 | `GET /api/graph/cfg` | Control flow graph of a function |
-| `GET /api/slice/forward` | Forward data flow slice |
-| `GET /api/slice/backward` | Backward data flow slice |
 | `GET /api/source` | Source file content |
 | `GET /api/search/symbol` | Symbol search with LIKE matching |
 | `GET /api/search/xref` | Cross-references for a symbol |
