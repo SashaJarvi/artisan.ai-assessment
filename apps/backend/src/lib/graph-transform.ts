@@ -1,6 +1,6 @@
 import type { ICytoscapeEdge, ICytoscapeNode, IGraphResponse } from '@cpg-explorer/shared'
 
-interface RawNode {
+export interface RawNode {
   id: string;
   kind: string;
   name: string;
@@ -15,7 +15,7 @@ interface RawNode {
   depth?: number;
 }
 
-interface RawEdge {
+export interface RawEdge {
   source: string;
   target: string;
   kind: string;
