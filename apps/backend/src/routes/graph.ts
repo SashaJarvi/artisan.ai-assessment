@@ -1,19 +1,48 @@
-import { Router } from 'express'
+import type Database from 'better-sqlite3'
+import { type Request, type Response, Router } from 'express'
 import { getDb } from '../db.js'
-import { buildGraphResponse, transformEdges, transformNodes } from '../lib/graph-transform.js'
+import { type RawEdge, type RawNode, buildGraphResponse, transformEdges, transformNodes } from '../lib/graph-transform.js'
+
 
 const router = Router()
 
-router.get('/call-chain', (req, res) => {
-  const db = getDb()
-  const functionId = req.query.function as string
-  const depth = Math.min(Number(req.query.depth) || 3, 10)
-  const maxNodes = Math.min(Number(req.query.max_nodes) || 60, 200)
+interface GraphParams {
+  functionId: string
+  depth: number
+  maxNodes: number
+}
 
+const parseGraphParams = (req: Request, res: Response, depthDefault: number, depthMax: number): GraphParams | null => {
+  const functionId = req.query.function as string
   if (!functionId) {
     res.status(400).json({ error: 'function parameter is required' })
-    return
+    return null
   }
+  return {
+    functionId,
+    depth: Math.min(Number(req.query.depth) || depthDefault, depthMax),
+    maxNodes: Math.min(Number(req.query.max_nodes) || 60, 200)
+  }
+}
+
+const fetchCallEdges = (db: Database.Database, nodeRows: RawNode[]) => {
+  const nodeIds = Array.from(new Set(nodeRows.map(r => r.id as string)))
+  const placeholders = nodeIds.map(() => '?').join(',')
+  return db.prepare(`
+    SELECT source, target, kind FROM edges
+    WHERE kind = 'call' AND source IN (${placeholders})
+      AND target IN (${placeholders})
+  `).all(...nodeIds, ...nodeIds) as RawEdge[]
+}
+
+const buildAndRespond = (res: Response, nodeRows: RawNode[], edgeRows: RawEdge[], maxNodes: number) => {
+  res.json(buildGraphResponse(transformNodes(nodeRows), transformEdges(edgeRows), maxNodes))
+}
+
+router.get('/call-chain', (req, res) => {
+  const params = parseGraphParams(req, res, 3, 10)
+  if (!params) return
+  const db = getDb()
 
   const nodeRows = db.prepare(`
     WITH RECURSIVE chain(id, depth, path) AS (
@@ -25,30 +54,15 @@ router.get('/call-chain', (req, res) => {
         AND c.path NOT LIKE '%' || e.target || '%'
     )
     SELECT DISTINCT n.* FROM chain c JOIN nodes n ON n.id = c.id
-  `).all(functionId, functionId, depth)
+  `).all(params.functionId, params.functionId, params.depth) as RawNode[]
 
-  const nodeIds = new Set(nodeRows.map((r: any) => r.id))
-  const edgeRows = db.prepare(`
-    SELECT source, target, kind FROM edges
-    WHERE kind = 'call' AND source IN (${Array.from(nodeIds).map(() => '?').join(',')})
-      AND target IN (${Array.from(nodeIds).map(() => '?').join(',')})
-  `).all(...Array.from(nodeIds), ...Array.from(nodeIds))
-
-  const nodes = transformNodes(nodeRows as any[])
-  const edges = transformEdges(edgeRows as any[])
-  res.json(buildGraphResponse(nodes, edges, maxNodes))
+  buildAndRespond(res, nodeRows, fetchCallEdges(db, nodeRows), params.maxNodes)
 })
 
 router.get('/callers', (req, res) => {
+  const params = parseGraphParams(req, res, 3, 5)
+  if (!params) return
   const db = getDb()
-  const functionId = req.query.function as string
-  const depth = Math.min(Number(req.query.depth) || 3, 5)
-  const maxNodes = Math.min(Number(req.query.max_nodes) || 60, 200)
-
-  if (!functionId) {
-    res.status(400).json({ error: 'function parameter is required' })
-    return
-  }
 
   const nodeRows = db.prepare(`
     WITH RECURSIVE callers(id, depth) AS (
@@ -60,18 +74,9 @@ router.get('/callers', (req, res) => {
     )
     SELECT DISTINCT n.* FROM callers c JOIN nodes n ON n.id = c.id
     WHERE n.kind = 'function'
-  `).all(functionId, depth)
+  `).all(params.functionId, params.depth) as RawNode[]
 
-  const nodeIds = new Set(nodeRows.map((r: any) => r.id))
-  const edgeRows = db.prepare(`
-    SELECT source, target, kind FROM edges
-    WHERE kind = 'call' AND source IN (${Array.from(nodeIds).map(() => '?').join(',')})
-      AND target IN (${Array.from(nodeIds).map(() => '?').join(',')})
-  `).all(...Array.from(nodeIds), ...Array.from(nodeIds))
-
-  const nodes = transformNodes(nodeRows as any[])
-  const edges = transformEdges(edgeRows as any[])
-  res.json(buildGraphResponse(nodes, edges, maxNodes))
+  buildAndRespond(res, nodeRows, fetchCallEdges(db, nodeRows), params.maxNodes)
 })
 
 router.get('/neighborhood', (req, res) => {
@@ -100,19 +105,17 @@ router.get('/neighborhood', (req, res) => {
       WHERE e.kind IN (${kindPlaceholders}) AND nb.depth < ?
     )
     SELECT DISTINCT n.* FROM neighborhood nb JOIN nodes n ON n.id = nb.id
-  `).all(nodeId, ...edgeKinds, depth, ...edgeKinds, depth)
+  `).all(nodeId, ...edgeKinds, depth, ...edgeKinds, depth) as RawNode[]
 
-  const nodeIds = new Set(nodeRows.map((r: any) => r.id))
+  const nodeIds = Array.from(new Set(nodeRows.map(r => r.id)))
   const edgeRows = db.prepare(`
     SELECT source, target, kind FROM edges
     WHERE kind IN (${kindPlaceholders})
-      AND source IN (${Array.from(nodeIds).map(() => '?').join(',')})
-      AND target IN (${Array.from(nodeIds).map(() => '?').join(',')})
-  `).all(...edgeKinds, ...Array.from(nodeIds), ...Array.from(nodeIds))
+      AND source IN (${nodeIds.map(() => '?').join(',')})
+      AND target IN (${nodeIds.map(() => '?').join(',')})
+  `).all(...edgeKinds, ...nodeIds, ...nodeIds) as RawEdge[]
 
-  const nodes = transformNodes(nodeRows as any[])
-  const edges = transformEdges(edgeRows as any[])
-  res.json(buildGraphResponse(nodes, edges, maxNodes))
+  buildAndRespond(res, nodeRows, edgeRows, maxNodes)
 })
 
 router.get('/cfg', (req, res) => {
@@ -139,10 +142,11 @@ router.get('/cfg', (req, res) => {
     ORDER BY bb.line
   `).all(functionId)
 
-  const nodeMap = new Map<string, any>()
-  const edgeList: any[] = []
+  interface CfgRow { block_id: string; block_name: string; block_line: number; successor_id: string | null; successor_name: string | null; branch_label: string | null }
+  const nodeMap = new Map<string, { data: Record<string, unknown>; classes: string }>()
+  const edgeList: { data: Record<string, unknown>; classes: string }[] = []
 
-  for (const row of rows as any[]) {
+  for (const row of rows as CfgRow[]) {
     if (!nodeMap.has(row.block_id)) {
       nodeMap.set(row.block_id, {
         data: {
