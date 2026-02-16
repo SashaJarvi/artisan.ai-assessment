@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
-import { computed } from 'vue';
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 
-const route = useRoute();
+const route = useRoute()
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: 'grid', shortLabel: 'Dash' },
-  { path: '/packages', label: 'Package Map', icon: 'package', shortLabel: 'Pkgs' },
-];
+  { path: '/packages', label: 'Package Map', icon: 'package', shortLabel: 'Pkgs' }
+]
 
-const isActive = (path: string) => computed(() => route.path === path);
+const isActive = (path: string) => computed(() => route.path === path)
 </script>
 
 <template>
@@ -42,7 +42,12 @@ const isActive = (path: string) => computed(() => route.path === path);
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
+          />
         </svg>
         <svg
           v-else-if="item.icon === 'package'"
@@ -51,7 +56,12 @@ const isActive = (path: string) => computed(() => route.path === path);
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+          />
         </svg>
         <svg
           v-else-if="item.icon === 'git-branch'"
@@ -60,7 +70,12 @@ const isActive = (path: string) => computed(() => route.path === path);
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 3v12m0 0a3 3 0 103 3 3 3 0 00-3-3zm12-6a3 3 0 10-3-3 3 3 0 003 3zm0 0v6a3 3 0 01-3 3H9" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M6 3v12m0 0a3 3 0 103 3 3 3 0 00-3-3zm12-6a3 3 0 10-3-3 3 3 0 003 3zm0 0v6a3 3 0 01-3 3H9"
+          />
         </svg>
         <svg
           v-else-if="item.icon === 'activity'"
@@ -69,7 +84,12 @@ const isActive = (path: string) => computed(() => route.path === path);
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M22 12h-4l-3 9L9 3l-3 9H2" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M22 12h-4l-3 9L9 3l-3 9H2"
+          />
         </svg>
 
         <!-- Tooltip -->

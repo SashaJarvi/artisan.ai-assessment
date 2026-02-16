@@ -8,7 +8,7 @@ interface Props {
   isLayoutRunning?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), { isLayoutRunning: false });
+const props = withDefaults(defineProps<Props>(), { isLayoutRunning: false })
 
 const emit = defineEmits<{
   layoutChange: [layout: string];
@@ -16,20 +16,20 @@ const emit = defineEmits<{
   zoomIn: [];
   zoomOut: [];
   exportPng: [];
-}>();
+}>()
 
 const layouts = [
   { value: 'cola', label: 'Force' },
   { value: 'dagre', label: 'Tree' },
   { value: 'cose', label: 'CoSE' },
-  { value: 'circle', label: 'Circle' },
-];
+  { value: 'circle', label: 'Circle' }
+]
 
 const zoomActions = [
   { handler: () => emit('zoomIn'), title: 'Zoom in', icon: 'M12 6v12m6-6H6' },
   { handler: () => emit('zoomOut'), title: 'Zoom out', icon: 'M18 12H6' },
-  { handler: () => emit('fitToView'), title: 'Fit to view', icon: 'M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5' },
-];
+  { handler: () => emit('fitToView'), title: 'Fit to view', icon: 'M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5' }
+]
 </script>
 
 <template>
@@ -63,8 +63,18 @@ const zoomActions = [
       :title="action.title"
       @click="action.handler"
     >
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="action.icon" />
+      <svg
+        class="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          :d="action.icon"
+        />
       </svg>
     </button>
 
@@ -74,12 +84,29 @@ const zoomActions = [
     <span class="text-gray-500">
       {{ totalNodes ?? 0 }} nodes &middot; {{ totalEdges ?? 0 }} edges
     </span>
-    <span v-if="isTruncated" class="text-amber-400">(truncated)</span>
+    <span
+      v-if="isTruncated"
+      class="text-amber-400"
+    >(truncated)</span>
 
     <!-- Export -->
-    <button class="btn-ghost p-1 cursor-pointer" title="Export PNG" @click="emit('exportPng')">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+    <button
+      class="btn-ghost p-1 cursor-pointer"
+      title="Export PNG"
+      @click="emit('exportPng')"
+    >
+      <svg
+        class="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+        />
       </svg>
     </button>
   </div>

@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
-import { computed } from 'vue';
-import SymbolSearch from '../search/SymbolSearch.vue';
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import SymbolSearch from '../search/SymbolSearch.vue'
 
-const route = useRoute();
+const route = useRoute()
 
 const pageTitle = computed(() => {
   const titles: Record<string, string> = {
     '/': 'Dashboard',
     '/packages': 'Package Architecture',
-    '/call-graph': 'Call Graph Explorer',
-  };
-  return titles[route.path] ?? 'CPG Explorer';
-});
+    '/call-graph': 'Call Graph Explorer'
+  }
+  return titles[route.path] ?? 'CPG Explorer'
+})
 </script>
 
 <template>

@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router'
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -6,17 +6,17 @@ export const router = createRouter({
     {
       path: '/',
       name: 'dashboard',
-      component: () => import('../pages/DashboardPage.vue'),
+      component: () => import('../pages/DashboardPage.vue')
     },
     {
       path: '/packages',
       name: 'packages',
-      component: () => import('../pages/PackageMapPage.vue'),
+      component: () => import('../pages/PackageMapPage.vue')
     },
     {
       path: '/call-graph',
       name: 'call-graph',
-      component: () => import('../pages/CallGraphPage.vue'),
-    },
-  ],
-});
+      component: () => import('../pages/CallGraphPage.vue')
+    }
+  ]
+})
