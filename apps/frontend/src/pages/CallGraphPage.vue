@@ -17,7 +17,9 @@ const sourceStore = useSourceStore();
 
 const canvasRef = ref<InstanceType<typeof CytoscapeCanvas> | null>(null);
 const depth = ref(3);
-const direction = ref<'callees' | 'callers' | 'both'>('callees');
+const directions = ['callees', 'callers'] as const;
+type Direction = (typeof directions)[number] | 'both';
+const direction = ref<Direction>('callees');
 const searchQuery = ref('');
 const searchResults = ref<ISymbolResult[]>([]);
 const isSearching = ref(false);
@@ -78,7 +80,7 @@ const handleDepthChange = (newDepth: number) => {
   }
 };
 
-const handleDirectionChange = (dir: 'callees' | 'callers' | 'both') => {
+const handleDirectionChange = (dir: Direction) => {
   direction.value = dir;
   if (currentFunctionId.value) {
     loadGraph(currentFunctionId.value);
@@ -130,6 +132,19 @@ const handleExportPng = () => {
   <div class="flex flex-col h-full">
     <!-- Controls bar -->
     <div class="flex items-center gap-3 px-4 py-2 border-b border-surface-border bg-surface-darker text-xs">
+      <!-- Back -->
+      <button
+        class="flex items-center gap-1 text-gray-400 hover:text-accent transition-colors"
+        @click="router.back()"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back
+      </button>
+
+      <div class="h-4 w-px bg-surface-border" />
+
       <!-- Search -->
       <div class="relative w-64">
         <input
@@ -175,18 +190,13 @@ const handleExportPng = () => {
       <!-- Direction -->
       <div class="flex gap-1 bg-surface rounded-md p-0.5">
         <button
-          class="px-2 py-1 rounded transition-colors"
-          :class="[direction === 'callees' ? 'bg-accent/20 text-accent' : 'text-gray-500 hover:text-gray-300']"
-          @click="handleDirectionChange('callees')"
+          v-for="dir in directions"
+          :key="dir"
+          class="px-2 py-1 rounded transition-colors cursor-pointer capitalize"
+          :class="[direction === dir ? 'bg-accent/20 text-accent' : 'text-gray-500 hover:text-gray-300']"
+          @click="handleDirectionChange(dir)"
         >
-          Callees
-        </button>
-        <button
-          class="px-2 py-1 rounded transition-colors"
-          :class="[direction === 'callers' ? 'bg-accent/20 text-accent' : 'text-gray-500 hover:text-gray-300']"
-          @click="handleDirectionChange('callers')"
-        >
-          Callers
+          {{ dir }}
         </button>
       </div>
 

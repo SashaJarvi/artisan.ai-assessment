@@ -1,4 +1,4 @@
-import { shallowRef, onMounted, onUnmounted, watch, type Ref, type ShallowRef } from 'vue';
+import { shallowRef, onMounted, onUnmounted, type Ref } from 'vue';
 import { EditorState, StateEffect, StateField, type Extension } from '@codemirror/state';
 import { EditorView, Decoration, type DecorationSet } from '@codemirror/view';
 import { go } from '@codemirror/lang-go';

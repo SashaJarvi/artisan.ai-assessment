@@ -34,7 +34,7 @@ const navigateToFunction = (functionId: string) => {
     <!-- Error state -->
     <div v-else-if="store.hasError" class="panel p-6 text-center">
       <p class="text-red-400 text-sm mb-2">Failed to load dashboard data</p>
-      <button class="btn-primary" @click="store.fetchAll()">Retry</button>
+      <button class="btn-primary cursor-pointer" @click="store.fetchAll()">Retry</button>
     </div>
 
     <!-- Dashboard content -->

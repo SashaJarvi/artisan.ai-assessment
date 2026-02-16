@@ -91,7 +91,7 @@ const handleExportPng = () => {
         class="flex items-center gap-2 px-3 py-1.5 border-b border-surface-border bg-surface-darker text-xs"
       >
         <button
-          class="flex items-center gap-1 text-gray-400 hover:text-accent transition-colors"
+          class="flex items-center gap-1 text-gray-400 hover:text-accent transition-colors cursor-pointer"
           @click="handleBack"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -154,16 +154,16 @@ const handleExportPng = () => {
         <button
           v-for="fn in packageFunctions"
           :key="fn.functionId"
-          class="w-full text-left px-4 py-3 hover:bg-white/[0.03] transition-colors"
+          class="w-full text-left px-4 py-3 hover:bg-white/[0.03] transition-colors cursor-pointer"
           @click="navigateToFunction(fn.functionId)"
         >
-          <div class="text-sm font-mono text-accent truncate">{{ fn.name }}</div>
-          <div class="flex gap-3 mt-1 text-xs text-gray-500">
+          <span class="block text-sm font-mono text-accent truncate">{{ fn.name }}</span>
+          <span class="flex gap-3 mt-1 text-xs text-gray-500">
             <span>CC: {{ fn.complexity }}</span>
             <span>LOC: {{ fn.loc }}</span>
             <span>In: {{ fn.fanIn }}</span>
             <span>Out: {{ fn.fanOut }}</span>
-          </div>
+          </span>
         </button>
       </div>
 

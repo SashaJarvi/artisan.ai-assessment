@@ -1,4 +1,4 @@
-import { ref, shallowRef, onMounted, onUnmounted, watch, type Ref } from 'vue';
+import { ref, shallowRef, onMounted, onUnmounted, type Ref } from 'vue';
 import cytoscape from 'cytoscape';
 import cola from 'cytoscape-cola';
 import dagre from 'cytoscape-dagre';

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { useCytoscape, type CytoscapeOptions } from '@/composables/use-cytoscape';
+import { useCytoscape, type CytoscapeOptions } from '@/composables/useCytoscape';
 import type { ICytoscapeNode, ICytoscapeEdge } from '@cpg-explorer/shared';
 
 interface Props {
