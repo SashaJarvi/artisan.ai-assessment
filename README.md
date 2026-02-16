@@ -4,13 +4,19 @@ An in-browser IDE for exploring Go codebases through their Code Property Graph (
 
 ## Prerequisites
 
-The `cpg-test-release` directory (containing the CPG generator source) must be placed alongside this project:
+### cpg-test-release
+
+The `cpg-test-release` directory contains the CPG generator — a Go program that statically analyzes Go source code and produces a SQLite database (`cpg.db`) representing the Code Property Graph. It parses Go modules, extracts nodes (packages, functions, types, variables, basic blocks) and edges (call, AST, CFG, type, dependency relationships), and writes them into a structured schema with pre-computed dashboard views and indexed queries.
+
+This directory must be placed alongside the project:
 
 ```
 parent/
-  cpg-test-release/     # CPG generator source (Go)
+  cpg-test-release/      # CPG generator source (Go): *.go, go.mod, go.sum
   artisan.ai-assessment/ # This project
 ```
+
+Docker Compose references it via `additional_contexts` so the Dockerfile can `COPY --from=cpg-source` without including it in the main build context.
 
 ## Quick Start
 
@@ -79,6 +85,19 @@ CodeMirror 6 is significantly lighter (~300KB vs ~2MB), supports Go syntax highl
 ### Why a single multi-stage Dockerfile?
 Everything — CPG generation, app build, and runtime — is in one Dockerfile with 4 stages. The Express backend serves the Vue SPA as static files, eliminating nginx/reverse proxy. Docker layer caching means the expensive CPG generation (~10-30 min) only runs once; subsequent builds reuse the cached database layer.
 
+## Docker Build Stages
+
+The `Dockerfile` uses a 4-stage multi-stage build:
+
+| Stage                | Base Image     | Purpose                                                                                                                                                                                                    |
+|----------------------|----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **1. cpg-builder**   | `golang:1.25`  | Compiles the CPG generator from `cpg-test-release` source into a `cpg-gen` binary                                                                                                                          |
+| **2. cpg-generator** | `golang:1.25`  | Clones all 4 Go modules (prometheus, client_golang, prometheus-adapter, alertmanager) at pinned commits, deduplicates `go.mod` files to avoid workspace conflicts, then runs `cpg-gen` to produce `cpg.db` |
+| **3. app-builder**   | `node:20-slim` | Installs npm dependencies, then runs `turbo build` to compile shared types, backend (TypeScript to JS), and frontend (Vue SPA to static assets)                                                            |
+| **4. runtime**       | `node:20-slim` | Copies the generated `cpg.db`, compiled backend, shared package, `node_modules`, and frontend static files. Runs `node dist/index.js` on port 3001                                                         |
+
+The Express backend serves the Vue SPA as static files, eliminating the need for nginx or a reverse proxy. Docker layer caching means the expensive CPG generation (~10-30 min) only runs on the first build; subsequent builds reuse the cached database layer.
+
 ## Development
 
 ```bash
@@ -99,11 +118,49 @@ Frontend dev server proxies `/api/*` to the backend.
 ```
 cpg-explorer/
   docker-compose.yml          # Single service with additional_contexts for cpg-test-release
-  Dockerfile                  # Multi-stage: cpg-gen build → DB generation → app build → runtime
-  packages/shared/            # Shared TypeScript types
-  apps/backend/               # Express REST API
-  apps/frontend/              # Vue 3 SPA
+  Dockerfile                  # Multi-stage: cpg-gen build -> DB generation -> app build -> runtime
+  eslint.config.js            # Centralized ESLint config (Vue + TS + stylistic rules)
+  turbo.json                  # Turborepo task pipeline (build, dev, lint, type-check)
+  packages/
+    shared/src/               # TypeScript interfaces shared between frontend and backend
+  apps/
+    backend/src/
+      lib/                    # Graph transforms, SQL query registry
+      middleware/              # Response caching, error handling
+      routes/                 # Express route handlers (dashboard, graph, packages, search, source)
+    frontend/src/
+      api/                    # Backend API client
+      components/             # Vue components (code viewer, dashboard, graph, layout, search)
+      composables/            # Vue composables (CodeMirror, Cytoscape.js)
+      pages/                  # Page components (Dashboard, PackageMap, CallGraph)
+      router/                 # Vue Router configuration
+      stores/                 # Pinia stores (dashboard, graph, source)
+      styles/                 # Tailwind CSS v4 theme and utilities
 ```
+
+### Scripts
+
+Root-level scripts (run via `npm run <script>`):
+
+| Script       | Command            | Description                                                                 |
+|--------------|--------------------|-----------------------------------------------------------------------------|
+| `dev`        | `turbo dev`        | Starts backend (port 3001) and frontend dev server (port 5173) concurrently |
+| `build`      | `turbo build`      | Builds shared types, then backend and frontend in parallel                  |
+| `lint`       | `turbo lint`       | Runs ESLint with auto-fix across all packages                               |
+| `type-check` | `turbo type-check` | Runs TypeScript type checking across all packages                           |
+| `prepare`    | `husky`            | Installs git hooks (pre-commit: lint-staged + type-check)                   |
+
+Per-package scripts:
+
+| Package    | Script    | Command                                                          |
+|------------|-----------|------------------------------------------------------------------|
+| `shared`   | `build`   | `tsc` — compiles TypeScript interfaces to JS + declaration files |
+| `backend`  | `dev`     | `tsx watch src/index.ts` — runs with hot reload                  |
+| `backend`  | `build`   | `tsc` — compiles to `dist/`                                      |
+| `backend`  | `start`   | `node dist/index.js` — production start                          |
+| `frontend` | `dev`     | `vite` — dev server with HMR                                     |
+| `frontend` | `build`   | `vue-tsc -b && vite build` — type-check then bundle to `dist/`   |
+| `frontend` | `preview` | `vite preview` — preview production build locally                |
 
 ## API Endpoints
 
