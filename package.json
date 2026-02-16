@@ -9,7 +9,14 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
-    "type-check": "turbo type-check"
+    "type-check": "turbo type-check",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,vue}": [
+      "eslint --fix",
+      "bash -c 'npm run type-check'"
+    ]
   },
   "packageManager": "npm@11.5.2",
   "devDependencies": {
@@ -20,6 +27,8 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-vue": "^10.8.0",
     "globals": "^17.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "turbo": "^2.3.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.55.0"
