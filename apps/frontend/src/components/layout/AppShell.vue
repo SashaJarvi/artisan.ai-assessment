@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { Suspense } from 'vue';
-import SidebarNav from './SidebarNav.vue';
-import HeaderBar from './HeaderBar.vue';
+import HeaderBar from './HeaderBar.vue'
+import SidebarNav from './SidebarNav.vue'
 </script>
 
 <template>
@@ -16,7 +15,9 @@ import HeaderBar from './HeaderBar.vue';
           </template>
           <template #fallback>
             <div class="flex items-center justify-center h-full">
-              <div class="text-gray-500 text-sm">Loading...</div>
+              <div class="text-gray-500 text-sm">
+                Loading...
+              </div>
             </div>
           </template>
         </Suspense>

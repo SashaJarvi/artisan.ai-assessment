@@ -1,56 +1,56 @@
-import { shallowRef, onMounted, onUnmounted, type Ref } from 'vue';
-import { EditorState, StateEffect, StateField, type Extension } from '@codemirror/state';
-import { EditorView, Decoration, type DecorationSet } from '@codemirror/view';
-import { go } from '@codemirror/lang-go';
-import { oneDark } from '@codemirror/theme-one-dark';
+import { type Ref, onMounted, onUnmounted, shallowRef } from 'vue'
+import { go } from '@codemirror/lang-go'
+import { EditorState, type Extension, StateEffect, StateField } from '@codemirror/state'
+import { oneDark } from '@codemirror/theme-one-dark'
+import { Decoration, type DecorationSet, EditorView } from '@codemirror/view'
 
 interface LineRange {
   from: number;
   to: number;
 }
 
-const addHighlightsEffect = StateEffect.define<LineRange[]>();
-const clearHighlightsEffect = StateEffect.define();
+const addHighlightsEffect = StateEffect.define<LineRange[]>()
+const clearHighlightsEffect = StateEffect.define()
 
 const highlightField = StateField.define<DecorationSet>({
   create: () => Decoration.none,
   update(decorations, tr) {
-    decorations = decorations.map(tr.changes);
+    decorations = decorations.map(tr.changes)
     for (const effect of tr.effects) {
       if (effect.is(clearHighlightsEffect)) {
-        decorations = Decoration.none;
+        decorations = Decoration.none
       }
       if (effect.is(addHighlightsEffect)) {
-        const marks = effect.value.map((range) =>
-          highlightMark.range(range.from, range.to),
-        );
-        decorations = Decoration.set(marks, true);
+        const marks = effect.value.map(range =>
+          highlightMark.range(range.from, range.to)
+        )
+        decorations = Decoration.set(marks, true)
       }
     }
-    return decorations;
+    return decorations
   },
-  provide: (f) => EditorView.decorations.from(f),
-});
+  provide: f => EditorView.decorations.from(f)
+})
 
 const highlightMark = Decoration.mark({
-  class: 'cm-dfg-highlight',
-});
+  class: 'cm-dfg-highlight'
+})
 
 const highlightTheme = EditorView.baseTheme({
   '.cm-dfg-highlight': {
     backgroundColor: 'rgba(66, 184, 131, 0.15)',
-    borderBottom: '2px solid rgba(66, 184, 131, 0.5)',
-  },
-});
+    borderBottom: '2px solid rgba(66, 184, 131, 0.5)'
+  }
+})
 
 export const useCodemirror = (
   containerRef: Ref<HTMLElement | null>,
-  options?: { extensions?: Extension[] },
+  options?: { extensions?: Extension[] }
 ) => {
-  const view = shallowRef<EditorView | null>(null);
+  const view = shallowRef<EditorView | null>(null)
 
   onMounted(() => {
-    if (!containerRef.value) return;
+    if (!containerRef.value) return
 
     const state = EditorState.create({
       doc: '',
@@ -65,68 +65,68 @@ export const useCodemirror = (
           '&': { height: '100%', fontSize: '13px' },
           '.cm-scroller': { overflow: 'auto' },
           '.cm-gutters': { backgroundColor: '#1a1a2e', borderRight: '1px solid rgba(255,255,255,0.1)' },
-          '.cm-activeLineGutter': { backgroundColor: 'rgba(66,184,131,0.1)' },
+          '.cm-activeLineGutter': { backgroundColor: 'rgba(66,184,131,0.1)' }
         }),
-        ...(options?.extensions ?? []),
-      ],
-    });
+        ...(options?.extensions ?? [])
+      ]
+    })
 
     view.value = new EditorView({
       state,
-      parent: containerRef.value,
-    });
-  });
+      parent: containerRef.value
+    })
+  })
 
   onUnmounted(() => {
-    view.value?.destroy();
-    view.value = null;
-  });
+    view.value?.destroy()
+    view.value = null
+  })
 
   const setContent = (code: string) => {
-    if (!view.value) return;
+    if (!view.value) return
     view.value.dispatch({
-      changes: { from: 0, to: view.value.state.doc.length, insert: code },
-    });
-  };
+      changes: { from: 0, to: view.value.state.doc.length, insert: code }
+    })
+  }
 
   const highlightLines = (lines: number[]) => {
-    if (!view.value) return;
-    const doc = view.value.state.doc;
-    const ranges: LineRange[] = [];
+    if (!view.value) return
+    const doc = view.value.state.doc
+    const ranges: LineRange[] = []
 
     for (const lineNum of lines) {
       if (lineNum > 0 && lineNum <= doc.lines) {
-        const line = doc.line(lineNum);
-        ranges.push({ from: line.from, to: line.to });
+        const line = doc.line(lineNum)
+        ranges.push({ from: line.from, to: line.to })
       }
     }
 
     view.value.dispatch({
-      effects: [clearHighlightsEffect.of(null), addHighlightsEffect.of(ranges)],
-    });
-  };
+      effects: [clearHighlightsEffect.of(null), addHighlightsEffect.of(ranges)]
+    })
+  }
 
   const clearHighlights = () => {
-    if (!view.value) return;
-    view.value.dispatch({ effects: clearHighlightsEffect.of(null) });
-  };
+    if (!view.value) return
+    view.value.dispatch({ effects: clearHighlightsEffect.of(null) })
+  }
 
   const scrollToLine = (lineNum: number) => {
-    if (!view.value) return;
-    const doc = view.value.state.doc;
+    if (!view.value) return
+    const doc = view.value.state.doc
     if (lineNum > 0 && lineNum <= doc.lines) {
-      const line = doc.line(lineNum);
+      const line = doc.line(lineNum)
       view.value.dispatch({
-        effects: EditorView.scrollIntoView(line.from, { y: 'center' }),
-      });
+        effects: EditorView.scrollIntoView(line.from, { y: 'center' })
+      })
     }
-  };
+  }
 
   return {
     view,
     setContent,
     highlightLines,
     clearHighlights,
-    scrollToLine,
-  };
-};
+    scrollToLine
+  }
+}

@@ -1,11 +1,11 @@
-import type { Request, Response, NextFunction } from 'express';
+import type { NextFunction, Request, Response } from 'express'
 
 export const errorHandler = (
   err: Error,
   _req: Request,
   res: Response,
-  _next: NextFunction,
+  _next: NextFunction
 ): void => {
-  console.error('API Error:', err.message);
-  res.status(500).json({ error: err.message });
-};
+  console.error('API Error:', err.message)
+  res.status(500).json({ error: err.message })
+}

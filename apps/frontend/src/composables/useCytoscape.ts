@@ -1,17 +1,17 @@
-import { ref, shallowRef, onMounted, onUnmounted, type Ref } from 'vue';
-import cytoscape from 'cytoscape';
-import cola from 'cytoscape-cola';
-import dagre from 'cytoscape-dagre';
-import type { ICytoscapeNode, ICytoscapeEdge } from '@cpg-explorer/shared';
+import { type Ref, onMounted, onUnmounted, ref, shallowRef } from 'vue'
+import type { ICytoscapeEdge, ICytoscapeNode } from '@cpg-explorer/shared'
+import cytoscape from 'cytoscape'
+import cola from 'cytoscape-cola'
+import dagre from 'cytoscape-dagre'
 
-let extensionsRegistered = false;
+let extensionsRegistered = false
 
 const registerExtensions = () => {
-  if (extensionsRegistered) return;
-  cytoscape.use(cola);
-  cytoscape.use(dagre);
-  extensionsRegistered = true;
-};
+  if (extensionsRegistered) return
+  cytoscape.use(cola)
+  cytoscape.use(dagre)
+  extensionsRegistered = true
+}
 
 export interface CytoscapeOptions {
   layout?: string;
@@ -20,7 +20,9 @@ export interface CytoscapeOptions {
   onBackgroundTap?: () => void;
 }
 
-const defaultStyle: any[] = [
+type CssProperties = Record<string, string | number>
+
+const defaultStyle: cytoscape.StylesheetStyle[] = [
   {
     selector: 'node',
     style: {
@@ -35,15 +37,15 @@ const defaultStyle: any[] = [
       'text-outline-color': '#0f0f23',
       'text-outline-width': 2,
       shape: 'round-rectangle',
-      'border-width': 0,
-    } as any,
+      'border-width': 0
+    } as CssProperties as cytoscape.Css.Node
   },
   {
     selector: 'node[!size]',
     style: {
       width: 30,
-      height: 30,
-    },
+      height: 30
+    } as cytoscape.Css.Node
   },
   {
     selector: 'edge',
@@ -54,33 +56,35 @@ const defaultStyle: any[] = [
       'target-arrow-shape': 'triangle',
       'curve-style': 'bezier',
       opacity: 0.6,
-      'arrow-scale': 0.8,
-    },
+      'arrow-scale': 0.8
+    } as cytoscape.Css.Edge
   },
   {
     selector: 'edge[color]',
     style: {
       'line-color': 'data(color)',
-      'target-arrow-color': 'data(color)',
-    } as any,
+      'target-arrow-color': 'data(color)'
+    } as CssProperties as cytoscape.Css.Edge
   },
   {
     selector: ':selected',
     style: {
       'border-width': 3,
-      'border-color': '#42b883',
-    },
+      'border-color': '#42b883'
+    } as cytoscape.Css.Node
   },
   {
     selector: 'node:active',
     style: {
       'overlay-opacity': 0.1,
-      'overlay-color': '#42b883',
-    },
-  },
-];
+      'overlay-color': '#42b883'
+    } as cytoscape.Css.Node
+  }
+]
 
-const layoutConfigs: Record<string, any> = {
+type LayoutConfig = cytoscape.BaseLayoutOptions & Record<string, unknown>
+
+const layoutConfigs: Record<string, LayoutConfig> = {
   cola: {
     name: 'cola',
     animate: true,
@@ -91,7 +95,7 @@ const layoutConfigs: Record<string, any> = {
     padding: 40,
     nodeDimensionsIncludeLabels: true,
     avoidOverlap: true,
-    randomize: false,
+    randomize: false
   },
   dagre: {
     name: 'dagre',
@@ -103,7 +107,7 @@ const layoutConfigs: Record<string, any> = {
     padding: 30,
     nodeDimensionsIncludeLabels: true,
     animate: true,
-    animationDuration: 300,
+    animationDuration: 300
   },
   cose: {
     name: 'cose',
@@ -113,29 +117,29 @@ const layoutConfigs: Record<string, any> = {
     padding: 30,
     nodeRepulsion: () => 8000,
     idealEdgeLength: () => 100,
-    nodeDimensionsIncludeLabels: true,
+    nodeDimensionsIncludeLabels: true
   },
   circle: {
     name: 'circle',
     fit: true,
     padding: 30,
     animate: true,
-    animationDuration: 300,
-  },
-};
+    animationDuration: 300
+  }
+}
 
 export const useCytoscape = (
   containerRef: Ref<HTMLElement | null>,
-  options?: CytoscapeOptions,
+  options?: CytoscapeOptions
 ) => {
-  registerExtensions();
+  registerExtensions()
 
-  const cy = shallowRef<cytoscape.Core | null>(null);
-  const currentLayout = ref(options?.layout ?? 'cola');
-  const isLayoutRunning = ref(false);
+  const cy = shallowRef<cytoscape.Core | null>(null)
+  const currentLayout = ref(options?.layout ?? 'cola')
+  const isLayoutRunning = ref(false)
 
   onMounted(() => {
-    if (!containerRef.value) return;
+    if (!containerRef.value) return
 
     cy.value = cytoscape({
       container: containerRef.value,
@@ -144,76 +148,76 @@ export const useCytoscape = (
       layout: { name: 'preset' },
       minZoom: 0.02,
       maxZoom: 5,
-      wheelSensitivity: 0.3,
-    });
+      wheelSensitivity: 0.3
+    })
 
-    cy.value.on('tap', 'node', (evt) => {
-      options?.onNodeTap?.(evt.target.id());
-    });
+    cy.value.on('tap', 'node', evt => {
+      options?.onNodeTap?.(evt.target.id())
+    })
 
-    cy.value.on('dbltap', 'node', (evt) => {
-      options?.onNodeDblClick?.(evt.target.id());
-    });
+    cy.value.on('dbltap', 'node', evt => {
+      options?.onNodeDblClick?.(evt.target.id())
+    })
 
-    cy.value.on('tap', (evt) => {
+    cy.value.on('tap', evt => {
       if (evt.target === cy.value) {
-        options?.onBackgroundTap?.();
+        options?.onBackgroundTap?.()
       }
-    });
-  });
+    })
+  })
 
   onUnmounted(() => {
-    cy.value?.destroy();
-    cy.value = null;
-  });
+    cy.value?.destroy()
+    cy.value = null
+  })
 
   const setElements = (nodes: ICytoscapeNode[], edges: ICytoscapeEdge[]) => {
-    if (!cy.value) return;
+    if (!cy.value) return
 
-    cy.value.elements().remove();
-    cy.value.add([...nodes, ...edges] as any);
-    runLayout(currentLayout.value);
-  };
+    cy.value.elements().remove()
+    cy.value.add([...nodes, ...edges] as cytoscape.ElementDefinition[])
+    runLayout(currentLayout.value)
+  }
 
   const runLayout = (name: string) => {
-    if (!cy.value) return;
-    currentLayout.value = name;
-    isLayoutRunning.value = true;
-    const config = layoutConfigs[name] ?? layoutConfigs.cola;
-    const layout = cy.value.layout(config);
+    if (!cy.value) return
+    currentLayout.value = name
+    isLayoutRunning.value = true
+    const config = layoutConfigs[name] ?? layoutConfigs.cola
+    const layout = cy.value.layout(config as cytoscape.LayoutOptions)
     layout.on('layoutstop', () => {
-      isLayoutRunning.value = false;
-    });
-    layout.run();
-  };
+      isLayoutRunning.value = false
+    })
+    layout.run()
+  }
 
   const fitToView = () => {
-    cy.value?.fit(undefined, 40);
-  };
+    cy.value?.fit(undefined, 40)
+  }
 
   const zoomIn = () => {
-    if (!cy.value) return;
-    cy.value.zoom({ level: cy.value.zoom() * 1.2, renderedPosition: { x: cy.value.width() / 2, y: cy.value.height() / 2 } });
-  };
+    if (!cy.value) return
+    cy.value.zoom({ level: cy.value.zoom() * 1.2, renderedPosition: { x: cy.value.width() / 2, y: cy.value.height() / 2 } })
+  }
 
   const zoomOut = () => {
-    if (!cy.value) return;
-    cy.value.zoom({ level: cy.value.zoom() * 0.8, renderedPosition: { x: cy.value.width() / 2, y: cy.value.height() / 2 } });
-  };
+    if (!cy.value) return
+    cy.value.zoom({ level: cy.value.zoom() * 0.8, renderedPosition: { x: cy.value.width() / 2, y: cy.value.height() / 2 } })
+  }
 
   const highlightNode = (id: string) => {
-    if (!cy.value) return;
-    cy.value.elements().unselect();
-    const node = cy.value.$id(id);
+    if (!cy.value) return
+    cy.value.elements().unselect()
+    const node = cy.value.$id(id)
     if (node.length) {
-      node.select();
-      cy.value.animate({ center: { eles: node }, duration: 300 });
+      node.select()
+      cy.value.animate({ center: { eles: node }, duration: 300 })
     }
-  };
+  }
 
   const exportPng = (): string | undefined => {
-    return cy.value?.png({ full: true, scale: 2, bg: '#0f0f23' });
-  };
+    return cy.value?.png({ full: true, scale: 2, bg: '#0f0f23' })
+  }
 
   return {
     cy,
@@ -225,6 +229,6 @@ export const useCytoscape = (
     zoomIn,
     zoomOut,
     highlightNode,
-    exportPng,
-  };
-};
+    exportPng
+  }
+}

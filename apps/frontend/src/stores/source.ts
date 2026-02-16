@@ -1,53 +1,53 @@
-import { ref } from 'vue';
-import { defineStore } from 'pinia';
-import { fetchApi } from '@/api/client';
-import type { ISourceFile, IOutlineEntry, IHighlightedLine } from '@cpg-explorer/shared';
+import { ref } from 'vue'
+import type { IHighlightedLine, IOutlineEntry, ISourceFile } from '@cpg-explorer/shared'
+import { defineStore } from 'pinia'
+import { fetchApi } from '@/api/client'
 
 export const useSourceStore = defineStore('source', () => {
-  const currentFile = ref<string | null>(null);
-  const content = ref('');
-  const pkg = ref('');
-  const outline = ref<IOutlineEntry[]>([]);
-  const highlightedLines = ref<IHighlightedLine[]>([]);
-  const isLoading = ref(false);
-  const scrollToLine = ref<number | null>(null);
+  const currentFile = ref<string | null>(null)
+  const content = ref('')
+  const pkg = ref('')
+  const outline = ref<IOutlineEntry[]>([])
+  const highlightedLines = ref<IHighlightedLine[]>([])
+  const isLoading = ref(false)
+  const scrollToLine = ref<number | null>(null)
 
   const fetchFile = async (file: string) => {
-    if (file === currentFile.value && content.value) return;
+    if (file === currentFile.value && content.value) return
 
-    isLoading.value = true;
+    isLoading.value = true
     try {
-      const res = await fetchApi<{ data: ISourceFile }>('/source', { file });
-      currentFile.value = res.data.file;
-      content.value = res.data.content;
-      pkg.value = res.data.package;
+      const res = await fetchApi<{ data: ISourceFile }>('/source', { file })
+      currentFile.value = res.data.file
+      content.value = res.data.content
+      pkg.value = res.data.package
     } catch {
-      content.value = '';
+      content.value = ''
     } finally {
-      isLoading.value = false;
+      isLoading.value = false
     }
-  };
+  }
 
   const fetchOutline = async (file: string) => {
     try {
-      const res = await fetchApi<{ data: IOutlineEntry[] }>('/source/outline', { file });
-      outline.value = res.data;
+      const res = await fetchApi<{ data: IOutlineEntry[] }>('/source/outline', { file })
+      outline.value = res.data
     } catch {
-      outline.value = [];
+      outline.value = []
     }
-  };
+  }
 
   const setHighlightedLines = (lines: IHighlightedLine[]) => {
-    highlightedLines.value = lines;
-  };
+    highlightedLines.value = lines
+  }
 
   const goToLine = (line: number) => {
-    scrollToLine.value = line;
-  };
+    scrollToLine.value = line
+  }
 
   const clearHighlights = () => {
-    highlightedLines.value = [];
-  };
+    highlightedLines.value = []
+  }
 
   return {
     currentFile,
@@ -61,6 +61,6 @@ export const useSourceStore = defineStore('source', () => {
     fetchOutline,
     setHighlightedLines,
     goToLine,
-    clearHighlights,
-  };
-});
+    clearHighlights
+  }
+})

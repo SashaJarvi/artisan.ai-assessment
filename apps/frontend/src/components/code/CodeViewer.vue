@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { useCodemirror } from '@/composables/useCodemirror';
+import { ref, watch } from 'vue'
+import { useCodemirror } from '@/composables/useCodemirror'
 
 interface Props {
   code: string;
@@ -15,43 +15,53 @@ const props = withDefaults(defineProps<Props>(), {
   highlightedLines: () => [],
   scrollTo: null,
   file: '',
-  isLoading: false,
-});
+  isLoading: false
+})
 
-const containerRef = ref<HTMLElement | null>(null);
-const { setContent, highlightLines, scrollToLine, clearHighlights } = useCodemirror(containerRef);
+const containerRef = ref<HTMLElement | null>(null)
+const { setContent, highlightLines, scrollToLine, clearHighlights } = useCodemirror(containerRef)
 
-watch(() => props.code, (code) => {
-  setContent(code);
-});
+watch(() => props.code, code => {
+  setContent(code)
+})
 
-watch(() => props.highlightedLines, (lines) => {
+watch(() => props.highlightedLines, lines => {
   if (lines && lines.length > 0) {
-    highlightLines(lines);
+    highlightLines(lines)
   } else {
-    clearHighlights();
+    clearHighlights()
   }
-});
+})
 
-watch(() => props.scrollTo, (line) => {
-  if (line) scrollToLine(line);
-});
+watch(() => props.scrollTo, line => {
+  if (line) scrollToLine(line)
+})
 </script>
 
 <template>
   <div class="relative h-full flex flex-col">
     <!-- File header -->
-    <div v-if="file" class="px-3 py-2 text-xs text-gray-500 border-b border-surface-border bg-surface-darker font-mono truncate">
+    <div
+      v-if="file"
+      class="px-3 py-2 text-xs text-gray-500 border-b border-surface-border bg-surface-darker font-mono truncate"
+    >
       {{ file }}
     </div>
 
     <!-- Loading -->
-    <div v-if="isLoading" class="flex-1 flex items-center justify-center bg-surface-dark">
+    <div
+      v-if="isLoading"
+      class="flex-1 flex items-center justify-center bg-surface-dark"
+    >
       <div class="w-6 h-6 border-2 border-gray-600 border-t-accent rounded-full animate-spin" />
     </div>
 
     <!-- Editor -->
-    <div v-show="!isLoading" ref="containerRef" class="flex-1 overflow-hidden" />
+    <div
+      v-show="!isLoading"
+      ref="containerRef"
+      class="flex-1 overflow-hidden"
+    />
 
     <!-- Empty state -->
     <div

@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { useDashboardStore } from '@/stores/dashboard';
-import KpiCards from '@/components/dashboard/KpiCards.vue';
-import ComplexityChart from '@/components/dashboard/ComplexityChart.vue';
-import FindingsSummary from '@/components/dashboard/FindingsSummary.vue';
-import HotspotTable from '@/components/dashboard/HotspotTable.vue';
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import ComplexityChart from '@/components/dashboard/ComplexityChart.vue'
+import FindingsSummary from '@/components/dashboard/FindingsSummary.vue'
+import HotspotTable from '@/components/dashboard/HotspotTable.vue'
+import KpiCards from '@/components/dashboard/KpiCards.vue'
+import { useDashboardStore } from '@/stores/dashboard'
 
-const store = useDashboardStore();
-const router = useRouter();
+const store = useDashboardStore()
+const router = useRouter()
 
 onMounted(() => {
-  store.fetchAll();
-});
+  store.fetchAll()
+})
 
 const navigateToFunction = (functionId: string) => {
-  router.push({ name: 'call-graph', query: { fn: functionId } });
-};
+  router.push({ name: 'call-graph', query: { fn: functionId } })
+}
 </script>
 
 <template>
@@ -24,7 +24,11 @@ const navigateToFunction = (functionId: string) => {
     <!-- Loading skeleton -->
     <template v-if="store.isLoading && !store.isLoaded">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div v-for="i in 4" :key="i" class="panel p-4 animate-pulse">
+        <div
+          v-for="i in 4"
+          :key="i"
+          class="panel p-4 animate-pulse"
+        >
           <div class="h-3 bg-white/5 rounded w-20 mb-2" />
           <div class="h-6 bg-white/5 rounded w-16" />
         </div>
@@ -32,9 +36,19 @@ const navigateToFunction = (functionId: string) => {
     </template>
 
     <!-- Error state -->
-    <div v-else-if="store.hasError" class="panel p-6 text-center">
-      <p class="text-red-400 text-sm mb-2">Failed to load dashboard data</p>
-      <button class="btn-primary cursor-pointer" @click="store.fetchAll()">Retry</button>
+    <div
+      v-else-if="store.hasError"
+      class="panel p-6 text-center"
+    >
+      <p class="text-red-400 text-sm mb-2">
+        Failed to load dashboard data
+      </p>
+      <button
+        class="btn-primary cursor-pointer"
+        @click="store.fetchAll()"
+      >
+        Retry
+      </button>
     </div>
 
     <!-- Dashboard content -->

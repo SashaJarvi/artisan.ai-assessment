@@ -1,131 +1,131 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useGraphStore } from '@/stores/graph';
-import { useSourceStore } from '@/stores/source';
-import { fetchApi } from '@/api/client';
-import CytoscapeCanvas from '@/components/graph/CytoscapeCanvas.vue';
-import GraphToolbar from '@/components/graph/GraphToolbar.vue';
-import SplitPanel from '@/components/layout/SplitPanel.vue';
-import CodeViewer from '@/components/code/CodeViewer.vue';
-import type { ISymbolResult } from '@cpg-explorer/shared';
+import { computed, onMounted, ref, watch } from 'vue'
+import type { ISymbolResult } from '@cpg-explorer/shared'
+import { useRoute, useRouter } from 'vue-router'
+import { fetchApi } from '@/api/client'
+import CodeViewer from '@/components/code/CodeViewer.vue'
+import CytoscapeCanvas from '@/components/graph/CytoscapeCanvas.vue'
+import GraphToolbar from '@/components/graph/GraphToolbar.vue'
+import SplitPanel from '@/components/layout/SplitPanel.vue'
+import { useGraphStore } from '@/stores/graph'
+import { useSourceStore } from '@/stores/source'
 
-const route = useRoute();
-const router = useRouter();
-const graphStore = useGraphStore();
-const sourceStore = useSourceStore();
+const route = useRoute()
+const router = useRouter()
+const graphStore = useGraphStore()
+const sourceStore = useSourceStore()
 
-const canvasRef = ref<InstanceType<typeof CytoscapeCanvas> | null>(null);
-const depth = ref(3);
-const directions = ['callees', 'callers'] as const;
-type Direction = (typeof directions)[number] | 'both';
-const direction = ref<Direction>('callees');
-const searchQuery = ref('');
-const searchResults = ref<ISymbolResult[]>([]);
-const isSearching = ref(false);
-const selectedFunctionName = ref('');
-const selectedNodeInfo = ref<Record<string, unknown> | null>(null);
+const canvasRef = ref<InstanceType<typeof CytoscapeCanvas> | null>(null)
+const depth = ref(3)
+const directions = ['callees', 'callers'] as const
+type Direction = (typeof directions)[number] | 'both'
+const direction = ref<Direction>('callees')
+const searchQuery = ref('')
+const searchResults = ref<ISymbolResult[]>([])
+const isSearching = ref(false)
+const selectedFunctionName = ref('')
+const selectedNodeInfo = ref<Record<string, unknown> | null>(null)
 
-const currentFunctionId = computed(() => (route.query.fn as string) || '');
+const currentFunctionId = computed(() => (route.query.fn as string) || '')
 
 onMounted(() => {
   if (currentFunctionId.value) {
-    loadGraph(currentFunctionId.value);
+    loadGraph(currentFunctionId.value)
   }
-});
+})
 
-watch(() => route.query.fn, (fn) => {
-  if (fn) loadGraph(fn as string);
-});
+watch(() => route.query.fn, fn => {
+  if (fn) loadGraph(fn as string)
+})
 
 const loadGraph = async (functionId: string) => {
   if (direction.value === 'callers') {
-    await graphStore.fetchCallers(functionId, depth.value);
+    await graphStore.fetchCallers(functionId, depth.value)
   } else {
-    await graphStore.fetchCallChain(functionId, depth.value);
+    await graphStore.fetchCallChain(functionId, depth.value)
   }
 
-  const node = graphStore.nodes.find((n) => n.data.id === functionId);
+  const node = graphStore.nodes.find(n => n.data.id === functionId)
   if (node) {
-    selectedFunctionName.value = node.data.label;
+    selectedFunctionName.value = node.data.label
   }
-};
+}
 
 const handleNodeTap = async (id: string) => {
-  graphStore.selectNode(id);
-  const node = graphStore.nodes.find((n) => n.data.id === id);
+  graphStore.selectNode(id)
+  const node = graphStore.nodes.find(n => n.data.id === id)
   if (node?.data.file) {
-    await sourceStore.fetchFile(node.data.file);
+    await sourceStore.fetchFile(node.data.file)
     if (node.data.line) {
-      sourceStore.goToLine(node.data.line);
+      sourceStore.goToLine(node.data.line)
     }
   }
-  selectedNodeInfo.value = node?.data ?? null;
-  canvasRef.value?.highlightNode(id);
-};
+  selectedNodeInfo.value = node?.data ?? null
+  canvasRef.value?.highlightNode(id)
+}
 
 const handleNodeDblClick = (id: string) => {
-  router.push({ name: 'call-graph', query: { fn: id } });
-};
+  router.push({ name: 'call-graph', query: { fn: id } })
+}
 
 const handleBackgroundTap = () => {
-  graphStore.selectNode(null);
-  selectedNodeInfo.value = null;
-};
+  graphStore.selectNode(null)
+  selectedNodeInfo.value = null
+}
 
 const handleDepthChange = (newDepth: number) => {
-  depth.value = newDepth;
+  depth.value = newDepth
   if (currentFunctionId.value) {
-    loadGraph(currentFunctionId.value);
+    loadGraph(currentFunctionId.value)
   }
-};
+}
 
 const handleDirectionChange = (dir: Direction) => {
-  direction.value = dir;
+  direction.value = dir
   if (currentFunctionId.value) {
-    loadGraph(currentFunctionId.value);
+    loadGraph(currentFunctionId.value)
   }
-};
+}
 
 const handleSearch = async () => {
   if (searchQuery.value.length < 2) {
-    searchResults.value = [];
-    return;
+    searchResults.value = []
+    return
   }
-  isSearching.value = true;
+  isSearching.value = true
   try {
     const res = await fetchApi<{ data: ISymbolResult[] }>('/search/symbol', {
       q: searchQuery.value,
       kind: 'function',
-      limit: 10,
-    });
-    searchResults.value = res.data;
+      limit: 10
+    })
+    searchResults.value = res.data
   } catch {
-    searchResults.value = [];
+    searchResults.value = []
   } finally {
-    isSearching.value = false;
+    isSearching.value = false
   }
-};
+}
 
 const selectSearchResult = (result: ISymbolResult) => {
-  router.push({ name: 'call-graph', query: { fn: result.id } });
-  searchQuery.value = '';
-  searchResults.value = [];
-};
+  router.push({ name: 'call-graph', query: { fn: result.id } })
+  searchQuery.value = ''
+  searchResults.value = []
+}
 
 const handleLayoutChange = (layout: string) => {
-  canvasRef.value?.runLayout(layout);
-};
+  canvasRef.value?.runLayout(layout)
+}
 
 const handleExportPng = () => {
-  const png = canvasRef.value?.exportPng();
+  const png = canvasRef.value?.exportPng()
   if (png) {
-    const a = document.createElement('a');
-    a.href = png;
-    a.download = 'call-graph.png';
-    a.click();
+    const a = document.createElement('a')
+    a.href = png
+    a.download = 'call-graph.png'
+    a.click()
   }
-};
+}
 </script>
 
 <template>
@@ -137,8 +137,18 @@ const handleExportPng = () => {
         class="flex items-center gap-1 text-gray-400 hover:text-accent transition-colors"
         @click="router.back()"
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          />
         </svg>
         Back
       </button>
@@ -152,7 +162,7 @@ const handleExportPng = () => {
           placeholder="Search functions..."
           class="w-full bg-surface-light border border-surface-border rounded-md px-3 py-1.5 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-accent/50"
           @input="handleSearch"
-        />
+        >
         <div
           v-if="searchResults.length > 0"
           class="absolute top-full mt-1 w-full bg-surface border border-surface-border rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto"
@@ -202,14 +212,20 @@ const handleExportPng = () => {
 
       <div class="flex-1" />
 
-      <span v-if="selectedFunctionName" class="text-gray-400 font-mono">
+      <span
+        v-if="selectedFunctionName"
+        class="text-gray-400 font-mono"
+      >
         {{ selectedFunctionName }}
       </span>
     </div>
 
     <!-- Main content: graph + code -->
     <div class="flex-1 min-h-0">
-      <SplitPanel direction="horizontal" :initial-ratio="0.6">
+      <SplitPanel
+        direction="horizontal"
+        :initial-ratio="0.6"
+      >
         <template #first>
           <div class="flex flex-col h-full">
             <GraphToolbar
@@ -242,7 +258,10 @@ const handleExportPng = () => {
         <template #second>
           <div class="flex flex-col h-full">
             <!-- Node info -->
-            <div v-if="selectedNodeInfo" class="px-3 py-2 border-b border-surface-border bg-surface-darker text-xs space-y-1">
+            <div
+              v-if="selectedNodeInfo"
+              class="px-3 py-2 border-b border-surface-border bg-surface-darker text-xs space-y-1"
+            >
               <div class="flex items-center gap-2">
                 <span class="tag-function">{{ (selectedNodeInfo as any).kind }}</span>
                 <span class="font-mono text-gray-200">{{ (selectedNodeInfo as any).label }}</span>
